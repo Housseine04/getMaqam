@@ -1,7 +1,7 @@
 CREATE TABLE PitchClass(
 	id SERIAL PRIMARY KEY,
 	arabic_name VARCHAR(50) NOT NULL,
-	western_approx VARCHAR(10),
+	western_approx VARCHAR(50),
 	solfege_name VARCHAR(10),
 	quarter_tone_idx INT NOT NULL CHECK (quarter_tone_idx >= 0 AND quarter_tone_idx < 24)
 );
