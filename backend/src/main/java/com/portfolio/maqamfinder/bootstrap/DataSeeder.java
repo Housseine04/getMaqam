@@ -6,7 +6,6 @@ import com.portfolio.maqamfinder.entity.PitchClass;
 import com.portfolio.maqamfinder.repo.JinsRepository;
 import com.portfolio.maqamfinder.repo.MaqamRepository;
 import com.portfolio.maqamfinder.repo.PitchClassRepository;
-
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -15,50 +14,108 @@ import java.util.List;
 @Component
 public class DataSeeder implements CommandLineRunner {
 
-    private final PitchClassRepository pitchClassRepository;
-    private final JinsRepository jinsRepository;
-    private final MaqamRepository maqamRepository;
+    private final PitchClassRepository pitchClassRepo;
+    private final JinsRepository jinsRepo;
+    private final MaqamRepository maqamRepo;
 
-    // Spring automatically injects the repositories into this constructor
-    public DataSeeder(PitchClassRepository pitchClassRepository, JinsRepository jinsRepository, MaqamRepository maqamRepository) {
-        this.pitchClassRepository = pitchClassRepository;
-        this.jinsRepository = jinsRepository;
-        this.maqamRepository = maqamRepository;
+    public DataSeeder(PitchClassRepository pitchClassRepo, JinsRepository jinsRepo, MaqamRepository maqamRepo) {
+        this.pitchClassRepo = pitchClassRepo;
+        this.jinsRepo = jinsRepo;
+        this.maqamRepo = maqamRepo;
     }
 
     @Override
     public void run(String... args) throws Exception {
 
-        // Only seed if the database is empty
-        if (pitchClassRepository.count() == 0) {
-            // 1. Create the Tonic Pitch (Rast / C half-flat)
+        if (pitchClassRepo.count() == 0) {
+
+            // ===============================
+            // PITCH CLASSES (The Tonic Notes)
+            // ===============================
             PitchClass rastPitch = new PitchClass();
             rastPitch.setArabicName("Rast");
-            rastPitch.setWesternApproximation("C half-fl");
+            rastPitch.setWesternApproximation("C");
             rastPitch.setSolfegeName("Do");
             rastPitch.setQuarterToneIndex(0);
+            pitchClassRepo.save(rastPitch);
 
-            pitchClassRepository.save(rastPitch); // Save to database
+            PitchClass dukahPitch = new PitchClass();
+            dukahPitch.setArabicName("Dukah");
+            dukahPitch.setWesternApproximation("D");
+            dukahPitch.setSolfegeName("Re");
+            dukahPitch.setQuarterToneIndex(4);
+            pitchClassRepo.save(dukahPitch);
 
-            // 2. Create the Building Blocks (Ajnas)
-            // Jins Rast (Size 4, Intervals: Whole, 3/4, 3/4 -> 4, 3, 3 in quarter tones)
-            Jins jinsRast = new Jins();
-            jinsRast.setName("Rast");
-            jinsRast.setSize(4);
-            jinsRast.setIntervalsInQuarterTones(List.of(4, 3, 3));
-            jinsRepository.save(jinsRast);
+            PitchClass sikahPitch = new PitchClass();
+            sikahPitch.setArabicName("Sikah");
+            sikahPitch.setWesternApproximation("E half-flat");
+            sikahPitch.setSolfegeName("Mi half-flat");
+            sikahPitch.setQuarterToneIndex(7); // 7 quarter-tones above C
+            pitchClassRepo.save(sikahPitch);
 
-            // 3. Create the Maqam recipe
-            Maqam maqamRast = new Maqam();
-            maqamRast.setName("Rast");
-            maqamRast.setFamilyName("Rast");
-            maqamRast.setTonicPitch(rastPitch); // Linking the Foreign Key!
-            maqamRast.setLowerJins(jinsRast);   // Linking the Foreign Key!
-            maqamRast.setUpperJins(jinsRast);   // Makam Rast uses Jins Rast for both halves
+            // ===========================
+            // AJNAS (The Building Blocks)
+            // ===========================
+            Jins jinsRast = createJins("Rast", 4, List.of(4, 3, 3));
+            Jins jinsBayati = createJins("Bayati", 4, List.of(3, 3, 4));
+            Jins jinsHijaz = createJins("Hijaz", 4, List.of(2, 6, 2));
+            Jins jinsNahawand = createJins("Nahawand", 4, List.of(4, 2, 4));
+            Jins jinsAjam = createJins("Ajam", 4, List.of(4, 4, 2));
+            Jins jinsKurd = createJins("Kurd", 4, List.of(2, 4, 4));
+            Jins jinsSaba = createJins("Saba", 4, List.of(3, 3, 2));
+            Jins jinsSikah = createJins("Sikah", 3, List.of(3, 4)); // Trichord
 
-            maqamRepository.save(maqamRast);
+            // =====================
+            // MAQAMAT - The "Big 8"
+            // =====================
 
-            System.out.println("Music Data Seeded Successfully!");
+            // Rast (Tonic: Do)
+            createMaqam("Rast", "Rast", rastPitch, jinsRast, jinsRast);
+
+            // Bayati (Tonic: Re)
+            createMaqam("Bayati", "Bayati", dukahPitch, jinsBayati, jinsNahawand);
+
+            // Hijaz (Tonic: Re)
+            createMaqam("Hijaz", "Hijaz", dukahPitch, jinsHijaz, jinsNahawand);
+
+            // Nahawand (Tonic: Do)
+            createMaqam("Nahawand", "Nahawand", rastPitch, jinsNahawand, jinsHijaz);
+
+            // Ajam (Tonic: Do)
+            createMaqam("Ajam", "Ajam", rastPitch, jinsAjam, jinsAjam);
+
+            // Kurd (Tonic: Re)
+            createMaqam("Kurd", "Kurd", dukahPitch, jinsKurd, jinsNahawand);
+
+            // Sikah (Tonic: Mi half-flat)
+            createMaqam("Sikah", "Sikah", sikahPitch, jinsSikah, jinsRast);
+
+            // Saba (Tonic: Re)
+            createMaqam("Saba", "Saba", dukahPitch, jinsSaba, jinsHijaz);
+
+            System.out.println("The 8 Main Arabic Maqamat Seeded Successfully!");
         }
+    }
+
+    // Helper method
+    // keep the Jins creation code clean
+    private Jins createJins(String name, int size, List<Integer> intervals) {
+        Jins jins = new Jins();
+        jins.setName(name);
+        jins.setSize(size);
+        jins.setIntervalsInQuarterTones(intervals);
+        return jinsRepo.save(jins);
+    }
+
+    // Helper method
+    // keep the Maqam creation code clean
+    private void createMaqam(String name, String familyName, PitchClass tonic, Jins lower, Jins upper) {
+        Maqam maqam = new Maqam();
+        maqam.setName(name);
+        maqam.setFamilyName(familyName);
+        maqam.setTonicPitch(tonic);
+        maqam.setLowerJins(lower);
+        maqam.setUpperJins(upper);
+        maqamRepo.save(maqam);
     }
 }

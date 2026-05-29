@@ -29,7 +29,18 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### IDE ###
+### VS Code ###
 .vscode/
 .antigravity/
 .idea/
+
+# Local Environment
+.env
+
+# Personal
+audio-processing/usefulcommands.txt
+*.wav
+
+# Python Virtual Environments
+audio-processing/venv/
+.venv/
