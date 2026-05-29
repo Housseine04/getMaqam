@@ -1,0 +1,3 @@
+librosa==0.10.1  #music audio analysis
+numpy==1.26.4  # numerical computing
+requests==2.31.0  #HTTP requests
