@@ -1,0 +1,23 @@
+CREATE TABLE PitchClass(
+	id SERIAL PRIMARY KEY,
+	arabic_name VARCHAR(50) NOT NULL,
+	western_approx VARCHAR(50),
+	solfege_name VARCHAR(10),
+	quarter_tone_idx INT NOT NULL CHECK (quarter_tone_idx >= 0 AND quarter_tone_idx < 24)
+);
+
+CREATE TABLE Jins(
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(50) NOT NULL,
+	size INT NOT NULL CHECK (size IN (3,4,5)),
+	intervals_in_quarter_tones INT[] NOT NULL
+);
+
+CREATE TABLE Maqam (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    family_name VARCHAR(50),
+    tonic_pitch_id INT REFERENCES PitchClass(id),
+    lower_jins_id INT REFERENCES Jins(id),
+    upper_jins_id INT REFERENCES Jins(id)
+);
