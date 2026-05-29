@@ -7,5 +7,5 @@ import com.portfolio.maqamfinder.entity.PitchClass;
 
 @Repository
 public interface PitchClassRepository extends JpaRepository<PitchClass, Integer> {
-    // Spring automatically gives us save(), findAll(), findById(), deleteById() etc.
+    // Spring automatically gives save(), findAll(), findById(), deleteById()...
 }
