@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y libsndfile1 && rm -rf /var/lib/apt/list
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y ffmpeg libsndfile1 && rm -rf /var/lib/apt/lists/*
 
 # Copy app content
 COPY . .
