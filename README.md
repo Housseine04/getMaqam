@@ -1,4 +1,4 @@
-# GetMaqam: AI-Powered Arabic Maqam Analyzer
+# [GetMaqam: AI-Powered Arabic Maqam Analyzer](https://get-maqam.vercel.app/)
 
 GetMaqam is an advanced, full-stack audio analysis engine designed to detect and classify Middle Eastern Maqamat (musical modes) from raw audio recordings. Built for both solo instrumentals and complex polyphonic orchestrations, this system identifies musical structures by scanning for relative microtonal intervals rather than relying on fixed absolute pitches.
 
