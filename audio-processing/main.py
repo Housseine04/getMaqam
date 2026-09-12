@@ -12,9 +12,9 @@ import numpy as np
 import soundfile as sf
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Booting up: Fetching database into local memory...")
+def load_cache():
+    if len(AJNAS_CACHE) > 0 and len(MAQAMAT_CACHE) > 0:
+        return True
     try:
         # Fetch and map all Ajnas by their interval strings
         ajnas_resp = requests.get(f"{API_BASE_URL}/ajnas", timeout=5.0)
@@ -33,9 +33,16 @@ async def lifespan(app: FastAPI):
                     MAQAMAT_CACHE[jins_id] = []
                 MAQAMAT_CACHE[jins_id].append(maqam)
                 
-        print(f"Cache Loaded: {len(AJNAS_CACHE)} Ajnas, {len(MAQAMAT_CACHE)} Maqamat grouping definitions.")
+        print(f"Cache Loaded: {len(AJNAS_CACHE)} Ajnas, {len(MAQAMAT_CACHE)} Maqamat grouping definitions from {API_BASE_URL}.")
+        return len(AJNAS_CACHE) > 0
     except Exception as e:
-        print(f"Warning: Could not reach Java API to populate cache: {e}")
+        print(f"Warning: Could not reach Java API at {API_BASE_URL} to populate cache: {e}")
+        return False
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print(f"Booting up: Fetching database from {API_BASE_URL} into local memory...")
+    load_cache()
     
     # COLD START COUNTER
     print("Warming up DSP Engine (Compiling Librosa JIT)... this may take a few seconds.")
@@ -91,13 +98,18 @@ async def analyze_audio(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     try:
-        #Extract frequencies using Librosa logic
+        # Ensure database cache is loaded (e.g. if Spring Boot started after this service)
+        if len(AJNAS_CACHE) == 0:
+            if not load_cache():
+                return {"status": "error", "message": f"Database cache is empty. Could not reach Spring Boot backend at {API_BASE_URL}."}
+
+        # Extract frequencies using Librosa logic
         frequencies = analyzer.extract_frequencies(temp_file_path)
         
         if len(frequencies) == 0:
-            return {"status": "error", "message": "No clear pitch detected."}
+            return {"status": "error", "message": "No clear pitch detected. Please try recording closer to the microphone or singing louder."}
 
-        # ask Java for the Maqam (We need to update find_maqam_from_api to return data instead of printing)
+        # Ask Java for the Maqam
         maqam_results = analyzer.analyze_audio_pipeline(frequencies)
         
         return maqam_results

@@ -232,7 +232,7 @@ export default function MaqamRecorder() {
       });
       const data = await response.json();
       if (data.status === 'success') setResults(data.results);
-      else setError(data.error || 'Could not identify the Maqam.');
+      else setError(data.error || data.message || 'Could not identify the Maqam.');
     } catch {
       setError('Failed to connect to the analysis server. Is Python running?');
     } finally {

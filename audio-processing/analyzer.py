@@ -1,12 +1,14 @@
 import librosa
 import numpy as np
 import itertools
+import os
 import requests
 import torch
 import torchcrepe
 
-# Base URL for local Spring Boot server
-API_BASE_URL = "https://getmaqam-production.up.railway.app/api"
+# Base URL for Spring Boot server (Docker internal service or configurable via env)
+API_BASE_URL = os.getenv("API_BASE_URL", "http://getmaqam-backend:8080/api")
+
 
 # In-Memory Cache for Ajnas and Maqamat
 AJNAS_CACHE = {}    # Key: "3,3,4", Value: Jins JSON object
@@ -252,7 +254,7 @@ def analyze_audio_pipeline(frequencies):
             # Divide each individual score by the total sum
             for res in merged_results:
                 normalized = (res["confidence_score"] / total_score) * 100
-                res["confidence_score"] = round(normalized, 1) 
+                res["confidence_score"] = round(normalized, 1)
                 
     # Last sort
     merged_results.sort(key=lambda x: x['confidence_score'], reverse=True)

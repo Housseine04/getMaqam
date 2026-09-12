@@ -3,6 +3,10 @@ services:
     build: ./audio-processing
     container_name: getmaqam-audio-processing
     restart: unless-stopped
+    environment:
+      API_BASE_URL: http://getmaqam-backend:8080/api
+    depends_on:
+      - backend
     expose:
       - "8000"
     networks:
@@ -18,8 +22,6 @@ services:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-    depends_on:
-      - audio-processing
     expose:
       - "8080"
     networks:
