@@ -1,11 +1,13 @@
 services:
   audio-processing:
     build: ./audio-processing
+    container_name: getmaqam-audio-processing
     restart: unless-stopped
     expose:
       - "8000"
     networks:
       - internal
+      - proxy-net
   
   backend:
     build: ./backend
