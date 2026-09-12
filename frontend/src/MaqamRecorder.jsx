@@ -227,7 +227,7 @@ export default function MaqamRecorder() {
     const formData = new FormData();
     formData.append('file', blob, 'recording.webm');
     try {
-      const response = await fetch('https://getmaqam-production-03d2.up.railway.app/analyze-audio', {
+      const response = await fetch('https://getmaqam.169-58-20-63.sslip.io/analyze-audio', {
         method: 'POST', body: formData,
       });
       const data = await response.json();
