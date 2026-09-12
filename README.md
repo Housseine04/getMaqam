@@ -29,6 +29,6 @@ The project is divided into a high-performance mathematical processing backend a
 
 ## Deployment Roadmap
 
-* **Backend:** Dockerized PyTorch/Uvicorn environment optimized for CPU execution, and querying from Java SpringBoot API hosted on Railway.
+* **Backend:** Dockerized PyTorch/Uvicorn environment optimized for CPU execution, and querying from Java SpringBoot API hosted on VPS.
 * **Database:** PostgreSQL hosted on Neon Cloud.
 * **Frontend:** Vite-optimized React build, styled with Tailwind CSS, deployed for public access.
